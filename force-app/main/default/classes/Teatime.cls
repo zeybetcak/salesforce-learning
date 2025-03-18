@@ -20,5 +20,7 @@ public with sharing class Teatime {
         Put 1 teaspoon of Sugar in Teacup
         Stir Tea in Teacup
     Serve Tea to a Friend*/
+    Integer numberOfSpoons;
+    System.debug(numberOfSpoons);
         }
 }
