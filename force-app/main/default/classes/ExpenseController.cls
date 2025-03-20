@@ -1,45 +1,48 @@
 public with sharing class ExpenseController {
     
     @AuraEnabled
-    public static void saveExpense(Decimal amount, String category, Date expenseDate, String currencyCode) {
-        try {
-            // ✅ Debugging: Log input values
-            System.debug('🚀 Attempting to insert Expense: Amount=' + amount + ', Category=' + category + ', Expense Date=' + expenseDate + ', Currency=' + currencyCode);
-    
-            // ✅ Ensure required fields are provided
-            if (amount == null || category == null || expenseDate == null) {
-                throw new AuraHandledException('❌ Missing required fields. Please enter all values.');
-            }
-    
-            // ✅ Set a default currency if it's null or blank
-            if (String.isBlank(currencyCode)) {
-                System.debug('⚠️ Currency Code is blank. Defaulting to USD.');
-                currencyCode = 'USD';
-            }
-    
-            // ✅ Create new Expense record
-            Expense__c expense = new Expense__c(
-                Amount__c = amount,
-                Category__c = category,
-                Expense_Date__c = expenseDate,
-                Currency__c = currencyCode
-            );
-    
-            insert expense;
-    
-            System.debug('✅ Expense inserted successfully: ' + expense.Id);
-    
-        } catch (DmlException e) {
-            System.debug('❌ DML Exception: ' + e.getDmlMessage(0));
-            throw new AuraHandledException('❌ Error saving expense: ' + e.getDmlMessage(0));
-        } catch (Exception ex) {
-            System.debug('❌ Unexpected Exception: ' + ex.getMessage());
-            throw new AuraHandledException('❌ Unexpected error: ' + ex.getMessage());
+public static void saveExpense(Decimal amount, String category, Date expenseDate, String currencyCode) {
+    try {
+        System.debug('🚀 Saving Expense: Amount=' + amount + ', Category=' + category + ', Currency=' + currencyCode);
+
+        if (amount == null || category == null || expenseDate == null) {
+            throw new AuraHandledException('❌ Missing required fields. Please enter all values.');
         }
+
+        if (String.isBlank(currencyCode)) {
+            System.debug('⚠️ Currency Code is blank. Defaulting to USD.');
+            currencyCode = 'USD';
+        }
+
+        Decimal conversionRate = 1; // Default for USD
+        if (currencyCode != 'USD') {
+            conversionRate = getConversionRate(currencyCode); // ✅ Fetch TRY → USD rate
+            System.debug('🌍 Storing Conversion Rate (USD per TRY): ' + conversionRate);
+        }
+
+        // ✅ Store the original amount and conversion rate
+        Expense__c expense = new Expense__c(
+            Amount__c = amount, // ✅ Store the original amount
+            Category__c = category,
+            Expense_Date__c = expenseDate,
+            Currency__c = currencyCode,
+            Conversion_Rate__c = conversionRate // ✅ Store conversion rate
+        );
+
+        insert expense;
+        System.debug('✅ Expense inserted successfully: ' + expense.Id);
+
+    } catch (DmlException e) {
+        System.debug('❌ DML Exception: ' + e.getDmlMessage(0));
+        throw new AuraHandledException('❌ Error saving expense: ' + e.getDmlMessage(0));
+    } catch (Exception ex) {
+        System.debug('❌ Unexpected Exception: ' + ex.getMessage());
+        throw new AuraHandledException('❌ Unexpected error: ' + ex.getMessage());
     }
+}
         
     @AuraEnabled(cacheable=true)
-public static Decimal getConversionRate(String currencyCode) {
+    public static Decimal getConversionRate(String currencyCode) {
     System.debug('🚀 getConversionRate called with currencyCode: ' + currencyCode);
 
     // ✅ Ensure currencyCode is not null
@@ -97,8 +100,13 @@ public static Decimal getConversionRate(String currencyCode) {
     return 1; // Default to 1 if API call fails
 }
 
-    @AuraEnabled(cacheable=true)
-    public static List<Expense__c> getExpenses() {
-        return [SELECT Name, Amount__c, Category__c, Expense_Date__c, Currency__c FROM Expense__c ORDER BY Expense_Date__c DESC];
-    }
+@AuraEnabled(cacheable=true)
+public static List<Expense__c> getExpenses() {
+    return [
+        SELECT Name, Amount__c, Category__c, Expense_Date__c, Currency__c, Conversion_Rate__c 
+        FROM Expense__c 
+        ORDER BY Expense_Date__c DESC
+    ];
+}
+
 }

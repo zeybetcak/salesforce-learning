@@ -1,31 +1,36 @@
 <template>
-  <lightning-card title="Expense List" icon-name="standard:account">
-      <div class="slds-p-around_medium">
-          <template if:true={expenses}>
-              <table class="slds-table slds-table_bordered">
-                  <thead>
-                      <tr>
-                          <th>Amount</th>
-                          <th>Category</th>
-                          <th>Date</th>
-                          <th>Currency</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <template for:each={expenses} for:item="expense">
-                          <tr key={expense.Id}>
-                              <td>{expense.Amount__c}</td>
-                              <td>{expense.Category__c}</td>
-                              <td>{expense.Expense_Date__c}</td>
-                              <td>{expense.Currency__c}</td>
-                          </tr>
-                      </template>
-                  </tbody>
-              </table>
-          </template>
-          <template if:false={expenses}>
-              <p>No expenses found.</p>
-          </template>
-      </div>
-  </lightning-card>
+    <lightning-card title="Expense List" icon-name="utility:money">
+        <div class="slds-m-around_medium">
+            <template if:true={expenses}>
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr class="slds-text-title_caps">
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={expenses} for:item="expense">
+                            <tr key={expense.Id}>
+                                <td>{expense.category}</td> <!-- ✅ Category -->
+                                <td>{expense.date}</td> <!-- ✅ Date -->
+                                <td>{expense.formattedAmount}</td> <!-- ✅ Corrected Currency Label -->
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template if:false={expenses}>
+                <p class="slds-text-color_weak slds-p-around_medium">No expenses recorded.</p>
+            </template>
+        </div>
+    </lightning-card>
 </template>
+
+
+
+
+
+
+
