@@ -1,3 +1,31 @@
 <template>
-    
+  <lightning-card title="Expense Tracker" icon-name="utility:money">
+      <div class="slds-p-around_medium">
+          <lightning-input type="number" label="Amount" name="amount" value={amount} onchange={handleInput}></lightning-input>
+          
+          <lightning-combobox
+              name="category"
+              label="Category"
+              value={category}
+              options={categoryOptions}
+              onchange={handleInput}>
+          </lightning-combobox>
+
+          <lightning-input type="date" label="Expense Date" name="expenseDate" value={expenseDate} onchange={handleInput}></lightning-input>
+
+          <!-- 🚀 Replace text input with a dropdown for currencies -->
+          <lightning-combobox
+            name="currencyCode"
+            label="Currency"
+            value={currencyCode}
+            options={currencyOptions}
+            onchange={handleInput}>
+          </lightning-combobox>
+
+
+          <p><strong>Converted Amount:</strong> {convertedAmount}</p>
+
+          <lightning-button label="Save Expense" variant="brand" onclick={handleSave} class="slds-m-top_medium"></lightning-button>
+      </div>
+  </lightning-card>
 </template>
